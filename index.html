@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chandigarh House Price Predictor</title>
+    <script src="https://unpkg.com/@tensorflow/tfjs@latest"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Claymorphism Theme */
+        body {
+            background: #f0f4f8;
+        }
+        .clay-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 
+                8px 8px 16px #d1d9e6,
+                -8px -8px 16px #ffffff;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .clay-input {
+            background: #f0f4f8;
+            border: none;
+            box-shadow: 
+                inset 2px 2px 5px #d1d9e6,
+                inset -2px -2px 5px #ffffff;
+        }
+        .clay-button {
+            background: linear-gradient(145deg, #4a90e2, #357abd);
+            box-shadow: 
+                5px 5px 10px #d1d9e6,
+                -5px -5px 10px #ffffff;
+            transition: all 0.3s ease;
+        }
+        .clay-button:hover {
+            box-shadow: 
+                3px 3px 6px #d1d9e6,
+                -3px -3px 6px #ffffff;
+            transform: translateY(2px);
+        }
+        .clay-select {
+            background: #f0f4f8;
+            box-shadow: 
+                inset 2px 2px 5px #d1d9e6,
+                inset -2px -2px 5px #ffffff;
+        }
+        .clay-checkbox {
+            border-radius: 6px;
+            box-shadow: 
+                2px 2px 4px #d1d9e6,
+                -2px -2px 4px #ffffff;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto clay-card p-8">
+        <div class="flex items-center justify-center mb-8">
+            <i class="bi bi-house-door text-4xl text-blue-600 mr-3"></i>
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">
+                Chandigarh House Price Predictor
+            </h1>
+        </div>
+
+        <form id="predictionForm" class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-3">Number of Bedrooms</label>
+                    <input type="number" name="bedrooms" min="1" max="10" required
+                        class="w-full p-3 rounded-xl clay-input focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-3">Number of Bathrooms</label>
+                    <input type="number" name="bathrooms" min="1" max="10" required
+                        class="w-full p-3 rounded-xl clay-input focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-3">Carpet Area (sq ft)</label>
+                <input type="number" name="area" min="100" required
+                    class="w-full p-3 rounded-xl clay-input focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-3">Location</label>
+                <select name="location" required class="w-full p-3 rounded-xl clay-select focus:outline-none">
+                    <option value="">Select Location</option>
+                    <option value="Sector 17">Sector 17 (City Center)</option>
+                    <option value="Sector 35">Sector 35 (Market Area)</option>
+                    <option value="Sector 7">Sector 7 (Premium)</option>
+                    <option value="Sector 8">Sector 8 (Premium)</option>
+                    <option value="Sector 9">Sector 9 (Premium)</option>
+                    <option value="Sector 11">Sector 11 (Residential)</option>
+                    <option value="Sector 15">Sector 15 (Residential)</option>
+                    <option value="Sector 22">Sector 22 (Commercial)</option>
+                    <option value="Sector 34">Sector 34 (Market Area)</option>
+                    <option value="Sector 43">Sector 43 (Transport Hub)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-4">Amenities</label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="gym" class="clay-checkbox w-5 h-5">
+                        <span>Gym</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="security" class="clay-checkbox w-5 h-5">
+                        <span>24x7 Security</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="parking" class="clay-checkbox w-5 h-5">
+                        <span>Parking</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="market" class="clay-checkbox w-5 h-5">
+                        <span>Near Market</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="park" class="clay-checkbox w-5 h-5">
+                        <span>Park</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 clay-card cursor-pointer">
+                        <input type="checkbox" name="pool" class="clay-checkbox w-5 h-5">
+                        <span>Swimming Pool</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full clay-button text-white py-4 rounded-xl text-lg font-semibold">
+                Calculate Estimated Price
+            </button>
+        </form>
+
+        <div id="result" class="mt-8 hidden">
+            <div class="clay-card p-8 text-center">
+                <h2 class="text-2xl font-semibold text-blue-800 mb-4">Estimated Price Range</h2>
+                <p id="predictedPrice" class="text-4xl font-bold text-blue-600 mb-3"></p>
+                <p class="text-sm text-gray-600">
+                    *This estimation is based on current market rates and recent property transactions
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const basePrice = {
+            "Sector 17": 15000,
+            "Sector 35": 12000,
+            "Sector 7": 18000,
+            "Sector 8": 17500,
+            "Sector 9": 17000,
+            "Sector 11": 14000,
+            "Sector 15": 13000,
+            "Sector 22": 13500,
+            "Sector 34": 11500,
+            "Sector 43": 10500
+        };
+
+        const amenityMultipliers = {
+            gym: 1.06,
+            security: 1.04,
+            parking: 1.05,
+            market: 1.07,
+            park: 1.03,
+            pool: 1.08
+        };
+
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const location = formData.get('location');
+            const bedrooms = parseInt(formData.get('bedrooms'));
+            const bathrooms = parseInt(formData.get('bathrooms'));
+            const area = parseInt(formData.get('area'));
+
+            let price = basePrice[location] * area;
+
+            // Room multipliers
+            price *= (1 + (bedrooms * 0.12));
+            price *= (1 + (bathrooms * 0.06));
+
+            // Amenity multipliers
+            for (let [amenity, multiplier] of Object.entries(amenityMultipliers)) {
+                if (formData.get(amenity)) {
+                    price *= multiplier;
+                }
+            }
+
+            // Market fluctuation factor (±5%)
+            const lowerPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(price * 0.95);
+
+            const upperPrice = new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(price * 1.05);
+
+            const resultDiv = document.getElementById('result');
+            const predictedPrice = document.getElementById('predictedPrice');
+            
+            resultDiv.classList.remove('hidden');
+            predictedPrice.textContent = `${lowerPrice} - ${upperPrice}`;
+
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
